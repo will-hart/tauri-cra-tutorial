@@ -1,21 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { invoke } from '@tauri-apps/api'
+import { useInvoke } from "./useInvoke";
+
+const defaultArgs = { delta: 1}
 
 const App = () => {
-  const [counter, setCounter] = useState(-1)
-
-  useEffect(() => {
-    invoke('increment_counter', { delta: 0 }).then((result) => setCounter(result as number))
-  }, [setCounter])
-
-  const increment = useCallback(async () => {
-    const result = await invoke('increment_counter', { delta: 1 }) as number
-    setCounter(result)
-  }, [setCounter])
+  const { data: counter, update } = useInvoke(defaultArgs, 'get_counter', 'increment_counter')
+  const { data: counter2, update: update2 } = useInvoke(defaultArgs, 'get_counter', 'increment_counter')
 
   return (
     <div>
-      <button onClick={increment}>increment</button> {counter}
+      <div><button onClick={update}>increment</button> {counter}</div>
+      <div><button onClick={update2}>increment</button> {counter2}</div>
     </div>
   )
 }

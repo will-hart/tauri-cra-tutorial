@@ -13,10 +13,16 @@ fn increment_counter(state: State<AtomicI32>, delta: i32) -> Result<i32, String>
   Ok(state.fetch_add(delta, Ordering::SeqCst) + delta)
 }
 
+#[tauri::command]
+fn get_counter(state: State<AtomicI32>) -> Result<i32, String> {
+  println!("Getting counter value");
+  Ok(state.load(Ordering::SeqCst))
+}
+
 fn main() {
   tauri::Builder::default()
     .manage(AtomicI32::from(5))
-    .invoke_handler(tauri::generate_handler![increment_counter])
+    .invoke_handler(tauri::generate_handler![increment_counter, get_counter])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
