@@ -6,26 +6,30 @@ import useSWR from 'swr'
 
 export const invokeFetcher = async <TArgs extends Record<string, any>, TResult>(
   command: string,
+  id: number,
   args: TArgs
-): Promise<TResult> => invoke<TResult>(command, args)
+): Promise<TResult> => invoke<TResult>(command, { id, ...args })
 
-export const useInvoke = <TArgs extends Record<string, any>, TResult>(
-  args: TArgs,
+export const useInvoke = <TResult>(
+  id: number,
   getCommand: string,
   setCommand: string
 ) => {
-  // run the invoke command
+  // run the invoke command to get by ID
   const { data, error, mutate } = useSWR<TResult>(
-    [getCommand, args],
+    [getCommand, id, null],
     invokeFetcher
   )
 
   // create an update function
   const update = useCallback(
     async (newData: TResult) => {
-      mutate(await invoke(setCommand, { ...args }), false)
+      mutate(await invoke(
+        setCommand,
+        { id, ...newData }
+      ), false)
     },
-    [args, mutate, setCommand]
+    [mutate, id, setCommand]
   )
 
   return {
